@@ -1,30 +1,93 @@
-<?php include '../db.php'; ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Add Supplier</title>
-    <link rel="stylesheet" href="../css/style.css">
-</head>
-<body>
+<?php
+session_start();
+require_once "../db.php";
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: ../auth/login.php");
+    exit();
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+    $name = trim($_POST['name']);
+    $email = trim($_POST['email']);
+    $phone = trim($_POST['phone']);
+    $address = trim($_POST['address']);
+
+    $stmt = mysqli_prepare(
+        $conn,
+        "INSERT INTO suppliers
+        (name, email, phone, address)
+        VALUES (?, ?, ?, ?)"
+    );
+
+    mysqli_stmt_bind_param(
+        $stmt,
+        "ssss",
+        $name,
+        $email,
+        $phone,
+        $address
+    );
+
+    if (mysqli_stmt_execute($stmt)) {
+        header("Location: view.php?added=1");
+        exit();
+    } else {
+        $error = "Failed to add supplier.";
+    }
+}
+
+include "../includes/header.php";
+?>
 
 <h2>Add Supplier</h2>
-<div class="nav">
-    <a href="view.php">Back to Suppliers</a>
-</div>
 
-<form method="POST" style="text-align:center;">
-    Name: <input type="text" name="name" required><br><br>
-    Contact: <input type="text" name="contact" required><br><br>
-    <button name="add">Add Supplier</button>
+<?php
+if (isset($error)) {
+    echo "<p style='color:red;'>$error</p>";
+}
+?>
+
+<form method="POST">
+
+<label>Supplier Name</label>
+
+<input
+type="text"
+name="name"
+required>
+
+<label>Email</label>
+
+<input
+type="email"
+name="email">
+
+<label>Phone</label>
+
+<input
+type="text"
+name="phone">
+
+<label>Address</label>
+
+<textarea
+name="address"
+rows="4"></textarea>
+
+<br><br>
+
+<button type="submit" class="btn">
+    Add Supplier
+</button>
+
+<a href="view.php" class="btn">
+    Cancel
+</a>
+
 </form>
 
 <?php
-if (isset($_POST['add'])) {
-    $name = mysqli_real_escape_string($conn, $_POST['name']);
-    $contact = mysqli_real_escape_string($conn, $_POST['contact']);
-    mysqli_query($conn, "INSERT INTO suppliers (name, contact) VALUES ('$name','$contact')");
-    echo "<p style='color:green;text-align:center;'>Supplier Added!</p>";
-}
+include "../includes/footer.php";
 ?>
-</body>
-</html>
