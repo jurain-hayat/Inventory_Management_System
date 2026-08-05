@@ -18,10 +18,10 @@ if ($search != "") {
     $stmt = mysqli_prepare(
         $conn,
         "SELECT p.*, s.name AS supplier_name
-         FROM products p
-         LEFT JOIN suppliers s
-         ON p.supplier_id = s.supplier_id
-         WHERE p.name LIKE ?"
+        FROM products p
+        LEFT JOIN suppliers s
+        ON p.supplier_id = s.supplier_id
+        WHERE p.name LIKE ?"
     );
 
     $keyword = "%$search%";
@@ -36,10 +36,10 @@ if ($search != "") {
     $result = mysqli_query(
         $conn,
         "SELECT p.*, s.name AS supplier_name
-         FROM products p
-         LEFT JOIN suppliers s
-         ON p.supplier_id = s.supplier_id
-         ORDER BY p.product_id DESC"
+        FROM products p
+        LEFT JOIN suppliers s
+        ON p.supplier_id = s.supplier_id
+        ORDER BY p.product_id DESC"
     );
 
 }
@@ -47,7 +47,12 @@ if ($search != "") {
 include "../includes/header.php";
 ?>
 
-<h2>Products</h2>
+<h2>Product List</h2>
+<?php
+if (isset($_GET['deleted'])) {
+    echo "<p style='color:green;'>✅ Product deleted successfully.</p>";
+}
+?>
 
 <form method="GET" style="margin:20px 0;">
 
