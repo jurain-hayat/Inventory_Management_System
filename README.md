@@ -1,48 +1,107 @@
-# Running this in XAMPP + VS Code
 
-## 1. Place the folder
-Copy this whole `inventory` folder into XAMPP's `htdocs` directory:
-- Windows: `C:\xampp\htdocs\inventory`
-- Mac: `/Applications/XAMPP/htdocs/inventory`
-- Linux: `/opt/lampp/htdocs/inventory`
+# 📦 Inventory Management System
 
-## 2. Start services
-Open **XAMPP Control Panel** and click **Start** next to both **Apache** and **MySQL**.
+A web-based Inventory Management System built using **PHP**, **MySQL (MariaDB)**, **XAMPP**, and **Git**.
 
-## 3. Create the database
-Go to `http://localhost/phpmyadmin`, click the **SQL** tab, paste the contents
-of `schema.sql` (included in this folder), and click **Go**. This creates the
-`inventory_db` database with the `products`, `suppliers`, and `sales` tables,
-plus one sample product so the dashboard isn't empty.
+---
 
-## 4. Open in VS Code
-`code .` from inside the `inventory` folder, or File > Open Folder. The PHP
-extension isn't required to run it (XAMPP's Apache handles execution) — it's
-just useful for syntax highlighting and autocomplete. The **PHP Intelephense**
-extension is a good free option.
+## 🚀 Features
 
-## 5. Open it in your browser
-Visit `http://localhost/inventory/`. Click **Login**, use:
-- Username: `admin`
-- Password: `1234`
+### Authentication
 
-From the dashboard you can manage Products, Suppliers, and Sales.
+- Login
+- Logout
+- Session Management
 
-## Notes
-- `db.php` is already set for XAMPP's defaults (`localhost`, user `root`, no
-  password). No changes needed unless you set a MySQL root password.
-- `connect.php` (from the original upload) was **left out** of this package —
-  it contained live credentials for a remote InfinityFree database. If you
-  need it for deployment later, keep those credentials out of anything you
-  share or commit to version control.
-- This is a learning/demo project. Before using it anywhere real, see the
-  security notes from earlier in this conversation (SQL injection, plaintext
-  password, no CSRF protection, GET-based deletes).
+### Dashboard
 
-# Inventory Management System
+- Total Products
+- Total Suppliers
+- Total Sales
+- Low Stock Counter
 
-Built with:
+### Product Management
+
+- View Products
+- Add Product
+- Edit Product *(Coming Soon)*
+- Delete Product *(Coming Soon)*
+- Search Products *(Coming Soon)*
+
+### Supplier Management
+
+- Add Supplier
+- View Suppliers
+
+### Sales Management
+
+- Add Sales
+- View Sales
+
+---
+
+## 🛠 Technologies Used
+
 - PHP
-- MySQL
-- XAMPP
+- MySQL / MariaDB
+- HTML5
+- CSS3
+- JavaScript
 - Git
+- XAMPP
+- VS Code
+
+---
+
+## ✅ Completed
+
+- [X] Database
+- [X] Login System
+- [X] Dashboard
+- [X] Product List
+- [X] Add Product
+- [X] Git Repository
+
+---
+
+## 🚧 In Progress
+
+- [ ] Edit Product
+
+---
+
+## 📋 Planned
+
+- [ ] Delete Product
+- [ ] Product Image Upload
+- [ ] Search Products
+- [ ] Pagination
+- [ ] Supplier CRUD
+- [ ] Sales CRUD
+- [ ] Reports (PDF & Excel)
+- [ ] Dashboard Charts
+- [ ] Responsive Design
+- [ ] Dark Mode
+
+---
+
+## 📌 Version History
+
+### Version 1.0
+
+- Database Created
+- Authentication
+- Dashboard
+- Product Management (View & Add)
+
+### Version 1.1 *(Current Development)*
+
+- Edit Product
+- Delete Product
+- Product Images
+
+---
+
+## 👨‍💻 Developer
+
+**Jurain Hayat**
