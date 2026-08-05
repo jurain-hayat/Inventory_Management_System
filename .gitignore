@@ -1,0 +1,14 @@
+# Ignore uploaded images
+assets/uploads/*
+
+# But keep the uploads folder itself
+!assets/uploads/.gitkeep
+
+# Ignore VS Code settings
+.vscode/
+
+# Windows system file
+Thumbs.db
+
+# macOS system file
+.DS_Store
