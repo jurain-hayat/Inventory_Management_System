@@ -38,3 +38,11 @@ From the dashboard you can manage Products, Suppliers, and Sales.
 - This is a learning/demo project. Before using it anywhere real, see the
   security notes from earlier in this conversation (SQL injection, plaintext
   password, no CSRF protection, GET-based deletes).
+
+# Inventory Management System
+
+Built with:
+- PHP
+- MySQL
+- XAMPP
+- Git
