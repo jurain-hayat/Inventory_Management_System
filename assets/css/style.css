@@ -98,3 +98,40 @@ button{
 button:hover{
     background:#1d4ed8;
 }
+/* Dashboard Cards */
+
+.card {
+    display: block;
+    text-decoration: none;
+    color: white;
+    background: #232d3f;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    background: #2d3b52;
+}
+
+.table-container {
+    margin-top: 20px;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+table th {
+    background: #232d3f;
+}
+
+table td,
+table th {
+    padding: 15px;
+}
