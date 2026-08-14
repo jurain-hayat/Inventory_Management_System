@@ -4,7 +4,7 @@ require_once __DIR__ . '/lexer.php';
 require_once __DIR__ . '/parser.php';
 require_once __DIR__ . '/semantic.php';
 
-$query = "SHOW PRODUCTS WHERE name > 100";
+$query = "SHOW PRODUCTS WHERE quantity < 5 OR price > 500";
 
 echo "Query:\n";
 echo $query . "\n\n";
