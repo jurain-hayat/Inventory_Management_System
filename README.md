@@ -1,8 +1,8 @@
 # 📦 Inventory Management System
 
-A web-based **Inventory Management System** developed as a university/academic project using **PHP, MySQL/MariaDB, HTML5, CSS3, JavaScript, and XAMPP**.
+A web-based **Inventory Management System** developed as a university academic project using **PHP, MySQL/MariaDB, HTML5, CSS3, JavaScript, Chart.js, and XAMPP**.
 
-The system is designed to manage products, suppliers, sales, stock levels, users, and inventory-related information through a simple web dashboard.
+The system provides functionality for managing products, suppliers, sales, inventory stock, users, dashboard analytics, and a custom **Inventory Query Language** developed as part of the Compiler Design component.
 
 ---
 
@@ -10,74 +10,108 @@ The system is designed to manage products, suppliers, sales, stock levels, users
 
 The Inventory Management System provides a centralized interface for managing inventory operations.
 
-The project includes:
+### Main Features
 
-- User authentication
-- Dashboard with inventory statistics
-- Product management
-- Supplier management
-- Sales management
-- Stock monitoring
-- Revenue and inventory-value summaries
-- Sales analytics
-- Best-selling product information
-- Low-stock alerts
-- Recent sales information
-- Responsive modern UI
-- Git version control
-
-This project was created for **university/academic purposes** and can also serve as a foundation for a larger inventory application.
+- 🔐 User authentication
+- 📊 Inventory dashboard
+- 📦 Product management
+- 🚚 Supplier management
+- 💰 Sales management
+- 📉 Stock monitoring
+- 📈 Revenue statistics
+- 📊 Dashboard analytics
+- 🔎 Custom Inventory Query Language
+- 🧠 Compiler Design integration
+- 🔤 Lexical analysis
+- 🌳 Syntax analysis
+- 🧪 Semantic analysis
+- ⚠️ Compiler error handling
+- 🗃️ MySQL/MariaDB database
+- 🔀 Git/GitHub version control
+- 🎨 Responsive web interface
 
 ---
 
-## ✨ Features
+# ✨ Features
 
-### 🔐 Authentication
+## 🔐 Authentication
+
+The system includes session-based authentication.
+
+Features:
 
 - User login
 - User logout
-- Session-based authentication
-- Protected dashboard access
-- User information and role display
+- Session management
+- Protected pages
+- Username display
+- User role display
 
-### 📊 Dashboard
+Login page:
 
-The dashboard provides an overview of the current inventory system, including:
+```text
+/auth/login.php
+```
+
+---
+
+## 📊 Dashboard
+
+The dashboard provides an overview of the inventory system.
+
+It includes:
 
 - Total Products
 - Total Suppliers
 - Total Users
 - Total Sales
-- Low Stock count
-- Out of Stock count
+- Low Stock Count
+- Out of Stock Count
 - Total Inventory Value
 - Total Revenue
 - Today's Revenue
-- Current Month's Revenue
-- Last 12 months sales/revenue chart
-- Stock status chart
-- Top 5 best-selling products
+- Monthly Revenue
+- Sales analytics
+- Stock status information
+- Best-selling products
 - Low-stock alerts
 - Recent sales
-- Quick action buttons
+- Quick navigation actions
 - Live date and time
 
-### 📦 Product Management
+Charts are implemented using **Chart.js**.
+
+---
+
+# 📦 Product Management
+
+The product management module allows users to:
 
 - View products
 - Add products
 - Edit products
 - Delete products
 - Search products
-- Display product price
-- Display product quantity
-- Supplier information
-- Product availability status
-- Low-stock status
-- Out-of-stock status
-- Product image support
+- Store product descriptions
+- Store product prices
+- Store product quantities
+- Assign suppliers
+- Upload product images
+- Display stock availability
+- Display low-stock status
+- Display out-of-stock status
 
-### 🚚 Supplier Management
+Product module:
+
+```text
+/products/
+```
+
+---
+
+# 🚚 Supplier Management
+
+The supplier module allows users to:
 
 - Add suppliers
 - View suppliers
@@ -87,56 +121,323 @@ The dashboard provides an overview of the current inventory system, including:
 - Store supplier phone
 - Store supplier address
 
-### 💰 Sales Management
+Supplier module:
+
+```text
+/suppliers/
+```
+
+---
+
+# 💰 Sales Management
+
+The sales module allows users to:
 
 - Add sales
 - View sales
-- Record product quantity sold
+- Select products
+- Record quantity sold
 - Record unit price
 - Calculate total sale price
 - Store sale date
+- Track revenue
 - Display recent sales
-- Track total revenue
-- Track daily revenue
-- Track monthly revenue
 
-### 📈 Inventory Analytics
+Sales module:
 
-The dashboard provides visual information about:
-
-- Monthly revenue performance
-- Current stock condition
-- Available stock
-- Low stock
-- Out-of-stock products
-- Best-selling products
-
-Charts are implemented using **Chart.js**.
+```text
+/sales/
+```
 
 ---
 
-## 🛠️ Technologies Used
+# 🧠 Compiler Design Integration
 
-| Technology      | Purpose                         |
-| --------------- | ------------------------------- |
-| PHP 8.5.9       | Backend/server-side programming |
-| MySQL / MariaDB | Database management             |
-| HTML5           | Page structure                  |
-| CSS3            | Styling and responsive UI       |
-| JavaScript      | Client-side functionality       |
-| Chart.js        | Dashboard charts                |
-| XAMPP           | Local development environment   |
-| Git             | Version control                 |
-| GitHub          | Source-code hosting             |
-| VS Code         | Development environment         |
+The project includes a custom **Inventory Query Language (IQL)** developed as part of the Compiler Design component.
+
+Users can enter simplified inventory queries such as:
+
+```text
+SHOW PRODUCTS WHERE quantity < 10
+```
+
+The query is processed through a compiler-style pipeline.
+
+## Compiler Pipeline
+
+```text
+Inventory Query
+       ↓
+Lexical Analysis
+       ↓
+Syntax Analysis
+       ↓
+Semantic Analysis
+       ↓
+SQL Generation
+       ↓
+Database Execution
+       ↓
+Inventory Results
+```
 
 ---
 
-## 💻 Development Environment
+## 🔤 1. Lexical Analysis
+
+The lexer converts the input query into tokens.
+
+Example:
+
+```text
+SHOW PRODUCTS WHERE quantity < 10
+```
+
+Produces:
+
+```text
+KEYWORD    => SHOW
+KEYWORD    => PRODUCTS
+KEYWORD    => WHERE
+IDENTIFIER => quantity
+OPERATOR   => <
+NUMBER     => 10
+```
+
+The lexer also detects invalid characters.
+
+Example:
+
+```text
+SHOW PRODUCTS WHERE quantity @ 10
+```
+
+Produces:
+
+```text
+Lexical Error: Invalid character '@'.
+```
+
+---
+
+## 🌳 2. Syntax Analysis
+
+The parser checks whether the sequence of tokens follows the grammar of the Inventory Query Language.
+
+The project uses **Recursive Descent Parsing**.
+
+Example:
+
+```text
+SHOW PRODUCTS WHERE quantity < 10
+```
+
+Produces a parse tree similar to:
+
+```text
+Array
+(
+    [type] => QUERY
+    [condition] => Array
+        (
+            [type] => EXPRESSION
+            [field] => quantity
+            [operator] => <
+            [value] => 10
+        )
+)
+```
+
+Invalid syntax is reported with a syntax error.
+
+Example:
+
+```text
+SHOW PRODUCTS WHERE quantity <
+```
+
+Produces:
+
+```text
+Syntax Error: Expected a value after operator '<'.
+```
+
+---
+
+## 🧪 3. Semantic Analysis
+
+The semantic analyzer checks whether the query makes logical and type-related sense.
+
+It verifies:
+
+- Valid fields
+- Valid operators
+- Compatible data types
+- Symbol-table information
+- Logical expressions
+
+For example:
+
+```text
+SHOW PRODUCTS WHERE name > 100
+```
+
+is syntactically valid, but semantically invalid because the `>` operator is not valid for the `name` field.
+
+The compiler reports:
+
+```text
+Semantic Error: Operator '>' is not valid for field 'name'.
+```
+
+Another example:
+
+```text
+SHOW PRODUCTS WHERE abc < 10
+```
+
+produces:
+
+```text
+Semantic Error: Unknown field 'abc'.
+```
+
+---
+
+## 🔗 4. Logical Expressions
+
+The query language supports logical operators such as:
+
+```text
+AND
+OR
+```
+
+Example:
+
+```text
+SHOW PRODUCTS WHERE quantity < 10 AND price > 100
+```
+
+The parser generates a logical parse tree:
+
+```text
+LOGICAL
+├── operator: AND
+│
+├── quantity < 10
+│
+└── price > 100
+```
+
+Another example:
+
+```text
+SHOW PRODUCTS WHERE quantity < 5 OR price > 500
+```
+
+---
+
+## 🗃️ 5. Database Execution
+
+After successful lexical, syntax, and semantic analysis, the validated query is converted into a SQL `WHERE` condition.
+
+The system then executes the generated query against the inventory database.
+
+The compiler therefore connects:
+
+```text
+Custom Query Language
+        ↓
+Compiler
+        ↓
+SQL
+        ↓
+MySQL/MariaDB
+        ↓
+Inventory Results
+```
+
+---
+
+# ⚠️ Compiler Error Handling
+
+The compiler identifies errors at different stages.
+
+### Lexical Error
+
+Example:
+
+```text
+SHOW PRODUCTS WHERE quantity @ 10
+```
+
+Output:
+
+```text
+Stage: LEXICAL ANALYSIS
+
+Lexical Error: Invalid character '@'.
+```
+
+### Syntax Error
+
+Example:
+
+```text
+SHOW PRODUCTS WHERE quantity <
+```
+
+Output:
+
+```text
+Stage: SYNTAX ANALYSIS
+
+Syntax Error: Expected a value after operator '<'.
+```
+
+### Semantic Error
+
+Example:
+
+```text
+SHOW PRODUCTS WHERE abc < 10
+```
+
+Output:
+
+```text
+Stage: SEMANTIC ANALYSIS
+
+Semantic Error: Unknown field 'abc'.
+```
+
+---
+
+# 🛠️ Technologies Used
+
+| Technology | Purpose |
+|---|---|
+| PHP | Backend programming |
+| MySQL / MariaDB | Database management |
+| HTML5 | Page structure |
+| CSS3 | User interface and styling |
+| JavaScript | Client-side functionality |
+| Chart.js | Dashboard charts |
+| XAMPP | Local development server |
+| Git | Version control |
+| GitHub | Source-code hosting |
+| Visual Studio Code | Development environment |
+
+---
+
+# 💻 Development Environment
 
 ### Operating System
 
+```text
 Windows
+```
 
 ### PHP
 
@@ -164,7 +465,7 @@ Visual Studio Code
 
 ---
 
-## 📂 Project Structure
+# 📂 Project Structure
 
 ```text
 inventory/
@@ -201,6 +502,15 @@ inventory/
 │   ├── add.php
 │   └── view.php
 │
+├── compiler/
+│   ├── errors.php
+│   ├── lexer.php
+│   ├── parser.php
+│   ├── semantic.php
+│   ├── query.php
+│   ├── test_lexer.php
+│   └── test_parser.php
+│
 └── assets/
     ├── css/
     │   └── style.css
@@ -208,38 +518,31 @@ inventory/
     └── uploads/
 ```
 
-> The exact contents of the project folders may change as development continues.
-
 ---
 
-## 🗄️ Database
+# 🗄️ Database
 
-The project uses a database named:
+The project uses:
 
 ```text
 inventory_db
 ```
 
-The database contains the main entities required for the inventory system, including:
-
-- `users`
-- `products`
-- `suppliers`
-- `sales`
-
-The database schema is provided in:
+Main database tables:
 
 ```text
-schema.sql
+users
+products
+suppliers
+sales
 ```
 
-### Main Relationships
+## Database Relationship
 
 ```text
 Suppliers
     │
     │ 1
-    │
     │
     └──────────< Products
                     │
@@ -254,24 +557,24 @@ A product can have multiple sales records.
 
 ---
 
-## ⚙️ Installation & Setup
+# ⚙️ Installation & Setup
 
-Follow these steps to run the project locally.
-
-### 1. Install XAMPP
+## 1. Install XAMPP
 
 Install XAMPP on Windows.
 
-Start the following services from the XAMPP Control Panel:
+Start:
 
 ```text
 Apache
 MySQL
 ```
 
+from the XAMPP Control Panel.
+
 ---
 
-### 2. Copy the Project
+## 2. Copy the Project
 
 Place the project inside the XAMPP `htdocs` directory.
 
@@ -281,7 +584,7 @@ Example:
 C:\xampp\htdocs\inventory
 ```
 
-The main project file should therefore be:
+The main file should be:
 
 ```text
 C:\xampp\htdocs\inventory\index.php
@@ -289,9 +592,9 @@ C:\xampp\htdocs\inventory\index.php
 
 ---
 
-### 3. Create the Database
+## 3. Create the Database
 
-Open phpMyAdmin:
+Open:
 
 ```text
 http://localhost/phpmyadmin/
@@ -303,17 +606,17 @@ Create a database named:
 inventory_db
 ```
 
-Alternatively, use the SQL file provided with the project:
+Then import:
 
 ```text
 schema.sql
 ```
 
-Import `schema.sql` into the `inventory_db` database.
+into the database.
 
 ---
 
-### 4. Configure the Database Connection
+## 4. Configure Database Connection
 
 Open:
 
@@ -321,9 +624,7 @@ Open:
 db.php
 ```
 
-The database connection should contain the correct local MySQL/MariaDB configuration.
-
-Typical XAMPP configuration:
+A typical XAMPP configuration is:
 
 ```php
 $conn = mysqli_connect(
@@ -338,169 +639,153 @@ If your MySQL/MariaDB installation uses a password, update the password accordin
 
 ---
 
-### 5. Start the Application
+## 5. Run the Application
 
-Open a browser and visit:
+Open:
 
 ```text
 http://localhost/inventory/
 ```
 
-If the project opens through the dashboard directly, you can also use:
-
-```text
-http://localhost/inventory/dashboard.php
-```
-
----
-
-## 🔑 Login
-
-The system uses session-based authentication.
-
-A user must log in before accessing protected pages such as the dashboard.
-
-The login page is located at:
-
-```text
-auth/login.php
-```
-
-You can access it through:
+The login page can be accessed through:
 
 ```text
 http://localhost/inventory/auth/login.php
 ```
 
-> For security, do not publish real passwords, database credentials, or private configuration information in the GitHub repository.
+The compiler query analyzer is available at:
+
+```text
+http://localhost/inventory/compiler/query.php
+```
 
 ---
 
-## 🧪 Testing Checklist
+# 🧪 Testing
 
-Before submitting or demonstrating the project, test the following.
-
-### Authentication
+## Authentication
 
 - [ ] Login works
-- [ ] Incorrect login credentials are rejected
+- [ ] Invalid credentials are rejected
 - [ ] Logout works
-- [ ] Protected pages redirect unauthenticated users
-- [ ] Session information displays correctly
+- [ ] Protected pages require authentication
 
-### Dashboard
+## Dashboard
 
-- [ ] Dashboard loads without PHP errors
-- [ ] Product count is correct
-- [ ] Supplier count is correct
-- [ ] User count is correct
-- [ ] Sales count is correct
-- [ ] Low-stock count is correct
-- [ ] Out-of-stock count is correct
-- [ ] Inventory value is correct
-- [ ] Revenue values are correct
-- [ ] Sales chart loads
-- [ ] Stock chart loads
-- [ ] Best-selling products display
-- [ ] Low-stock alerts display
-- [ ] Recent sales display
-- [ ] Live date and time work
+- [ ] Dashboard loads
+- [ ] Product statistics are correct
+- [ ] Supplier statistics are correct
+- [ ] Sales statistics are correct
+- [ ] Stock information is correct
+- [ ] Revenue information is correct
+- [ ] Charts load correctly
 
-### Products
+## Products
 
-- [ ] Product list loads
-- [ ] Add product works
-- [ ] Edit product works
-- [ ] Delete product works
+- [ ] Products can be viewed
+- [ ] Products can be added
+- [ ] Products can be edited
+- [ ] Products can be deleted
 - [ ] Product search works
-- [ ] Supplier relationship works
-- [ ] Stock status displays correctly
-- [ ] Product image functionality works if enabled
+- [ ] Supplier relationships work
+- [ ] Stock status is displayed correctly
 
-### Suppliers
+## Suppliers
 
-- [ ] Supplier list loads
-- [ ] Add supplier works
-- [ ] Delete supplier works
-- [ ] Supplier information is stored correctly
+- [ ] Suppliers can be added
+- [ ] Suppliers can be viewed
+- [ ] Suppliers can be deleted
 
-### Sales
+## Sales
 
-- [ ] New sale can be created
-- [ ] Product is selected correctly
+- [ ] Sales can be added
+- [ ] Sales can be viewed
 - [ ] Quantity is recorded correctly
 - [ ] Total price is calculated correctly
-- [ ] Sale appears in the sales list
-- [ ] Dashboard revenue updates
-- [ ] Recent sales update
-- [ ] Stock quantity behaves correctly
+- [ ] Revenue updates correctly
 
-### UI
+## Compiler
 
-- [ ] Navigation links work
-- [ ] Buttons work
-- [ ] Tables display correctly
-- [ ] Forms display correctly
-- [ ] Responsive layout works
-- [ ] No broken images
-- [ ] No console errors
-- [ ] No PHP warnings/notices are visible
+- [ ] Valid queries are accepted
+- [ ] Invalid characters generate lexical errors
+- [ ] Invalid syntax generates syntax errors
+- [ ] Unknown fields generate semantic errors
+- [ ] Invalid operators generate semantic errors
+- [ ] `AND` expressions work
+- [ ] `OR` expressions work
+- [ ] Valid queries return inventory results
 
 ---
 
-## 🔒 Security Considerations
+# 🔎 Example Inventory Queries
 
-This project is intended primarily for academic/local development use.
+### Query 1 — Low Stock
 
-For a production deployment, additional security improvements should be implemented.
+```text
+SHOW PRODUCTS WHERE quantity < 10
+```
+
+### Query 2 — Expensive Products
+
+```text
+SHOW PRODUCTS WHERE price > 1000
+```
+
+### Query 3 — Very Low Stock
+
+```text
+SHOW PRODUCTS WHERE quantity <= 5
+```
+
+### Query 4 — Multiple Conditions
+
+```text
+SHOW PRODUCTS WHERE quantity < 10 AND price > 100
+```
+
+### Query 5 — OR Condition
+
+```text
+SHOW PRODUCTS WHERE quantity < 5 OR price > 500
+```
+
+---
+
+# 🔒 Security Considerations
+
+This project is primarily intended for academic and local development use.
+
+For production deployment, additional security measures should be implemented.
 
 Recommended improvements include:
 
-- Password hashing using `password_hash()`
-- Password verification using `password_verify()`
-- Prepared SQL statements for user input
-- Input validation
-- Output escaping using `htmlspecialchars()`
-- CSRF protection
-- Secure session configuration
-- Authorization checks based on user roles
-- Secure file-upload validation
-- Protection against SQL injection
-- Protection against XSS
-- Protection against unauthorized file access
-- Production database credentials stored outside the source repository
-
-Never commit sensitive credentials to GitHub.
+- Use `password_hash()` for passwords
+- Use `password_verify()` for login verification
+- Use prepared SQL statements
+- Validate user input
+- Escape HTML output
+- Add CSRF protection
+- Configure secure sessions
+- Implement proper role-based authorization
+- Validate uploaded files
+- Protect against SQL injection
+- Protect against XSS
+- Store production credentials outside the repository
+- Never commit passwords or database credentials to GitHub
 
 ---
 
-## 🌐 Running the Project
+# 🔧 Troubleshooting
 
-After starting Apache and MySQL/MariaDB in XAMPP:
+## Apache does not start
 
-```text
-http://localhost/inventory/
-```
+Check whether another application is using the configured Apache port.
 
-The application runs locally through the XAMPP Apache server.
+## MySQL does not start
 
----
+Check whether another MySQL/MariaDB service is using the database port.
 
-## 🔧 Troubleshooting
-
-### Apache does not start
-
-Check whether another application is already using port 80 or another configured Apache port.
-
----
-
-### MySQL does not start
-
-Check whether another MySQL/MariaDB service is using the configured database port.
-
----
-
-### Database connection error
+## Database connection error
 
 Check:
 
@@ -508,222 +793,154 @@ Check:
 - Database name is correct
 - Username is correct
 - Password is correct
-- Host is correct
-- `db.php` contains the correct configuration
+- `db.php` is configured correctly
 
----
+## Table does not exist
 
-### Table does not exist
+Import:
 
-Make sure `schema.sql` has been imported into:
+```text
+schema.sql
+```
+
+into:
 
 ```text
 inventory_db
 ```
 
-Then verify the database tables in phpMyAdmin or the MariaDB command line.
+Then verify the tables.
 
----
-
-### Foreign key error
+## Foreign Key Error
 
 Make sure referenced records exist before creating dependent records.
 
-For example, a product using a supplier ID must reference an existing supplier.
+For example, a product's `supplier_id` must reference an existing supplier.
 
----
+## PHP Error
 
-### PHP page shows a blank screen
-
-Temporarily enable PHP error reporting during development:
+During development, PHP errors can temporarily be enabled with:
 
 ```php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 ```
 
-Do not leave detailed error display enabled on a production server.
+Disable detailed error display on production systems.
 
 ---
 
-## 🧭 Development Roadmap
+# 🌱 Development Status
 
-### Completed
+## Completed
 
-- [X] Database setup
-- [X] Authentication
-- [X] Session management
-- [X] Dashboard
-- [X] Product management
-- [X] Supplier management
-- [X] Sales management
-- [X] Stock monitoring
-- [X] Revenue statistics
-- [X] Dashboard charts
-- [X] Best-selling product section
-- [X] Low-stock alerts
-- [X] Recent sales
-- [X] Modern dashboard UI
-- [X] Git version control
+- [x] Database setup
+- [x] Authentication
+- [x] Session management
+- [x] Dashboard
+- [x] Product management
+- [x] Supplier management
+- [x] Sales management
+- [x] Stock monitoring
+- [x] Revenue statistics
+- [x] Dashboard charts
+- [x] Best-selling products
+- [x] Low-stock alerts
+- [x] Recent sales
+- [x] Modern UI
+- [x] Git version control
+- [x] Inventory Query Language
+- [x] Lexical analysis
+- [x] Recursive descent parser
+- [x] Semantic analysis
+- [x] Compiler error handling
+- [x] Database query execution
 
-### Future Improvements
+---
+
+# 🚀 Future Improvements
+
+Possible future improvements include:
 
 - [ ] Advanced role-based access control
-- [ ] Admin/user permission management
+- [ ] User management
 - [ ] Advanced product filtering
-- [ ] Pagination improvements
-- [ ] Advanced reports
-- [ ] PDF report generation
-- [ ] Excel report export
-- [ ] Sales report by date range
-- [ ] Inventory report
+- [ ] Pagination
+- [ ] PDF reports
+- [ ] Excel export
+- [ ] Date-range sales reports
+- [ ] Inventory reports
 - [ ] Supplier performance reports
-- [ ] Email notifications for low stock
-- [ ] Improved audit logging
+- [ ] Email notifications
+- [ ] Audit logging
 - [ ] Automated database backup
-- [ ] Production deployment
 - [ ] Automated testing
-- [ ] API integration
+- [ ] REST API
+- [ ] Production deployment
 
 ---
 
-## 📊 Project Workflow
+# 🌱 Git & GitHub
 
-The basic workflow of the system is:
+The project uses Git for version control and GitHub for source-code hosting.
 
-```text
-User Login
-    ↓
-Dashboard
-    ↓
-┌───────────────┬───────────────┬───────────────┐
-│   Products    │   Suppliers   │     Sales     │
-└───────┬───────┴───────┬───────┴───────┬───────┘
-        │               │               │
-        ↓               ↓               ↓
-   Stock Data     Supplier Data     Sales Data
-        │               │               │
-        └───────────────┼───────────────┘
-                        ↓
-                  Dashboard
-                        ↓
-              Reports / Analytics
-```
-
----
-
-## 🌱 Git & GitHub
-
-Git is used for version control.
-
-### Initialize the repository
-
-From the project directory:
-
-```powershell
-cd C:\xampp\htdocs\inventory
-git init
-```
-
-### Check project status
+### Check Status
 
 ```powershell
 git status
 ```
 
-### Add files
+### Add Changes
 
 ```powershell
 git add .
 ```
 
-### Create a commit
+### Commit Changes
 
 ```powershell
-git commit -m "Initial Inventory Management System"
+git commit -m "Your commit message"
 ```
 
-### Rename the default branch
+### Push Changes
 
 ```powershell
-git branch -M main
+git push
 ```
 
-### Connect to GitHub
-
-After creating a GitHub repository, add its URL:
+### Create a Feature Branch
 
 ```powershell
-git remote add origin YOUR_GITHUB_REPOSITORY_URL
+git checkout -b feature/compiler-query
 ```
 
-Example:
+### Push a New Branch
 
 ```powershell
-git remote add origin https://github.com/YOUR_USERNAME/inventory-management-system.git
+git push -u origin feature/compiler-query
 ```
-
-### Push the project
-
-```powershell
-git push -u origin main
-```
-
-> Replace `YOUR_GITHUB_REPOSITORY_URL` and `YOUR_USERNAME` with your actual GitHub repository information.
 
 ---
 
-## 📁 Recommended `.gitignore`
-
-The project should not commit temporary files, secrets, or generated uploads.
-
-A recommended `.gitignore` is:
-
-```gitignore
-# XAMPP / local environment
-xampp/
-
-# Environment / secrets
-.env
-
-# PHP temporary files
-*.log
-
-# Uploaded/generated files
-assets/uploads/*
-!assets/uploads/.gitkeep
-
-# OS files
-Thumbs.db
-.DS_Store
-
-# Editor settings
-.vscode/
-```
-
-Review this file before pushing the project to GitHub.
-
----
-
-## 📝 Academic Project Information
+# 📝 Academic Project Information
 
 **Project Name:** Inventory Management System
 
 **Project Type:** University / Academic Project
 
-**Primary Purpose:** Inventory and sales management
-
 **Backend:** PHP
 
 **Database:** MySQL / MariaDB
-
-**Local Server:** XAMPP
 
 **Frontend:** HTML5, CSS3, JavaScript
 
 **Charts:** Chart.js
 
-**Version Control:** Git
+**Local Server:** XAMPP
+
+**Compiler Component:** Custom Inventory Query Language
+
+**Version Control:** Git / GitHub
 
 **Development Environment:** Visual Studio Code
 
@@ -731,17 +948,17 @@ Review this file before pushing the project to GitHub.
 
 ---
 
-## 📄 License
+# 📄 License
 
-This project is created for **educational and academic purposes**.
+This project was developed for **educational and academic purposes**.
 
-You may modify and extend the project for learning, coursework, experimentation, and personal development.
+It may be modified and extended for learning, coursework, experimentation, and personal development.
 
-If this project is later released publicly, the license can be changed to a formal open-source license such as the **MIT License**.
+A formal open-source license such as the MIT License can be added if the project is released for public use.
 
 ---
 
-## 👨‍💻 Developer
+# 👨‍💻 Developer
 
 **Md. Tanvir Khan**
 
@@ -749,7 +966,7 @@ University / Academic Project
 
 ---
 
-## ⭐ Acknowledgement
+# 🙏 Acknowledgement
 
 This project was developed as part of university-level academic work to practice:
 
@@ -760,28 +977,16 @@ This project was developed as part of university-level academic work to practice
 - CRUD operations
 - Authentication
 - Session management
-- Frontend UI development
+- UI development
 - Data visualization
-- Git and version control
+- Compiler design
+- Lexical analysis
+- Syntax analysis
+- Semantic analysis
+- Git and GitHub
 
 ---
 
-## 🚀 Future Vision
+## ❤️ Inventory Management System
 
-The long-term goal of the project is to evolve from a basic academic inventory application into a more complete inventory and business management platform with:
-
-- Advanced analytics
-- Role-based permissions
-- Automated reports
-- Notifications
-- Data export
-- Backup systems
-- Better security
-- API support
-- Production deployment
-
----
-
-**Inventory Management System — Academic Project**
-
-Built with ❤️ using PHP, MySQL/MariaDB, XAMPP, HTML, CSS, JavaScript, Chart.js, and Git.
+**Built with PHP, MySQL/MariaDB, XAMPP, HTML, CSS, JavaScript, Chart.js, and Git.**
