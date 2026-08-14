@@ -16,6 +16,10 @@
         Sales
     </a>
 
+    <a class="btn" href="/inventory/compiler/query.php">
+        Query Analyzer
+    </a>
+
     <a class="btn" href="/inventory/auth/logout.php">
         Logout
     </a>
