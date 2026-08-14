@@ -2,10 +2,11 @@
 
 session_start();
 
-require_once "../db.php";
-require_once "lexer.php";
-require_once "parser.php";
-require_once "semantic.php";
+require_once __DIR__ . "/../db.php";
+require_once __DIR__ . "/lexer.php";
+require_once __DIR__ . "/parser.php";
+require_once __DIR__ . "/semantic.php";
+require_once __DIR__ . "/errors.php";
 
 /*
  * =========================================================
