@@ -1,35 +1,66 @@
+```php
 <?php
+
 session_start();
 require_once "../db.php";
+
+
+/* =========================================================
+   LOGIN CHECK
+   ========================================================= */
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../auth/login.php");
     exit();
 }
 
+
+/* =========================================================
+   CHECK SUPPLIER ID
+   ========================================================= */
+
 if (!isset($_GET['id'])) {
     die("Supplier ID not found.");
 }
 
-$id = (int)$_GET['id'];
+$id = (int) $_GET['id'];
 
-// Get supplier
+
+/* =========================================================
+   GET SUPPLIER
+   ========================================================= */
+
 $stmt = mysqli_prepare(
     $conn,
-    "SELECT * FROM suppliers WHERE supplier_id = ?"
+    "SELECT *
+     FROM suppliers
+     WHERE supplier_id = ?"
 );
 
-mysqli_stmt_bind_param($stmt, "i", $id);
+mysqli_stmt_bind_param(
+    $stmt,
+    "i",
+    $id
+);
+
 mysqli_stmt_execute($stmt);
 
 $result = mysqli_stmt_get_result($stmt);
+
 $supplier = mysqli_fetch_assoc($result);
+
+mysqli_stmt_close($stmt);
+
 
 if (!$supplier) {
     die("Supplier not found.");
 }
 
-// Check if supplier is used by any products
+
+/* =========================================================
+   CHECK PRODUCTS
+   ========================================================= */
+
 $stmt = mysqli_prepare(
     $conn,
     "SELECT COUNT(*) AS total
@@ -37,71 +68,236 @@ $stmt = mysqli_prepare(
      WHERE supplier_id = ?"
 );
 
-mysqli_stmt_bind_param($stmt, "i", $id);
+mysqli_stmt_bind_param(
+    $stmt,
+    "i",
+    $id
+);
+
 mysqli_stmt_execute($stmt);
 
 $result = mysqli_stmt_get_result($stmt);
+
 $row = mysqli_fetch_assoc($result);
 
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+mysqli_stmt_close($stmt);
 
-    if ($row['total'] > 0) {
-        die("This supplier cannot be deleted because products are assigned to it.");
-    }
+$productCount = (int) $row['total'];
 
-    $stmt = mysqli_prepare(
-        $conn,
-        "DELETE FROM suppliers WHERE supplier_id = ?"
-    );
 
-    mysqli_stmt_bind_param($stmt, "i", $id);
+/* =========================================================
+   DELETE SUPPLIER
+   ========================================================= */
 
-    if (mysqli_stmt_execute($stmt)) {
-        header("Location: view.php?deleted=1");
-        exit();
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+    /*
+     * Do not delete a supplier that is being
+     * used by products.
+     */
+
+    if ($productCount > 0) {
+
+        $error =
+            "This supplier cannot be deleted because "
+            . $productCount
+            . " product(s) are assigned to it.";
+
     } else {
-        echo "<p style='color:red;'>Delete failed.</p>";
+
+        $stmt = mysqli_prepare(
+            $conn,
+            "DELETE FROM suppliers
+             WHERE supplier_id = ?"
+        );
+
+        mysqli_stmt_bind_param(
+            $stmt,
+            "i",
+            $id
+        );
+
+        if (mysqli_stmt_execute($stmt)) {
+
+            mysqli_stmt_close($stmt);
+
+            header("Location: view.php?deleted=1");
+            exit();
+
+        } else {
+
+            $error = "Failed to delete supplier.";
+
+        }
+
+        mysqli_stmt_close($stmt);
     }
 }
 
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
 include "../includes/header.php";
+
 ?>
 
-<h2>Delete Supplier</h2>
 
-<p>Are you sure you want to delete this supplier?</p>
+<!-- PAGE TITLE -->
 
-<table>
-    <tr>
-        <th>Name</th>
-        <td><?php echo htmlspecialchars($supplier['name']); ?></td>
-    </tr>
+<div class="page-title">
 
-    <tr>
-        <th>Email</th>
-        <td><?php echo htmlspecialchars($supplier['email']); ?></td>
-    </tr>
+    <h2>🗑️ Delete Supplier</h2>
 
-    <tr>
-        <th>Phone</th>
-        <td><?php echo htmlspecialchars($supplier['phone']); ?></td>
-    </tr>
-</table>
+</div>
 
-<br>
 
-<form method="POST">
+<!-- ERROR -->
 
-    <button
-        type="submit"
-        onclick="return confirm('Delete this supplier?');">
-        Delete Supplier
-    </button>
+<?php if (isset($error)): ?>
 
-    <a href="view.php">
-        <button type="button">Cancel</button>
+    <div class="error">
+        ❌ <?php echo htmlspecialchars($error); ?>
+    </div>
+
+<?php endif; ?>
+
+
+<!-- CONFIRMATION -->
+
+<div class="delete-confirmation">
+
+    <p>
+        Are you sure you want to delete this supplier?
+    </p>
+
+
+    <?php if ($productCount > 0): ?>
+
+        <div class="error">
+
+            ⚠️ This supplier is currently assigned to
+
+            <strong>
+                <?php echo $productCount; ?>
+            </strong>
+
+            product(s).
+
+            <br><br>
+
+            You must remove or change those product
+            assignments before deleting this supplier.
+
+        </div>
+
+    <?php endif; ?>
+
+
+    <!-- SUPPLIER INFORMATION -->
+
+    <table class="product-table">
+
+        <tr>
+
+            <th>Name</th>
+
+            <td>
+                <?php
+                echo htmlspecialchars(
+                    $supplier['name']
+                );
+                ?>
+            </td>
+
+        </tr>
+
+
+        <tr>
+
+            <th>Email</th>
+
+            <td>
+                <?php
+                echo htmlspecialchars(
+                    $supplier['email']
+                );
+                ?>
+            </td>
+
+        </tr>
+
+
+        <tr>
+
+            <th>Phone</th>
+
+            <td>
+                <?php
+                echo htmlspecialchars(
+                    $supplier['phone']
+                );
+                ?>
+            </td>
+
+        </tr>
+
+
+        <tr>
+
+            <th>Address</th>
+
+            <td>
+                <?php
+                echo htmlspecialchars(
+                    $supplier['address']
+                );
+                ?>
+            </td>
+
+        </tr>
+
+    </table>
+
+
+    <br>
+
+
+    <!-- ACTIONS -->
+
+    <?php if ($productCount === 0): ?>
+
+        <form method="POST">
+
+            <button
+                type="submit"
+                class="btn delete-btn"
+                onclick="return confirm('Are you absolutely sure you want to delete this supplier?');"
+            >
+                🗑️ Delete Supplier
+            </button>
+
+        </form>
+
+    <?php endif; ?>
+
+
+    <br>
+
+    <a
+        href="view.php"
+        class="btn"
+    >
+        ← Cancel
     </a>
 
-</form>
+</div>
 
-<?php include "../includes/footer.php"; ?>
+
+<?php
+
+include "../includes/footer.php";
+
+?>
+```

@@ -1,7 +1,6 @@
 <?php
 
 session_start();
-
 require_once "../db.php";
 
 /* =========================================================
@@ -59,40 +58,39 @@ $sort = (
    ORDER BY
    ========================================================= */
 
-$orderBy = "p.product_id DESC";
-
 switch ($sort) {
-
-    case "name_asc":
-        $orderBy = "p.name ASC";
-        break;
-
-    case "name_desc":
-        $orderBy = "p.name DESC";
-        break;
-
-    case "price_asc":
-        $orderBy = "p.price ASC";
-        break;
-
-    case "price_desc":
-        $orderBy = "p.price DESC";
-        break;
-
-    case "qty_asc":
-        $orderBy = "p.quantity ASC";
-        break;
-
-    case "qty_desc":
-        $orderBy = "p.quantity DESC";
-        break;
 
     case "oldest":
         $orderBy = "p.product_id ASC";
         break;
 
+    case "name_asc":
+        $orderBy = "p.name ASC, p.product_id ASC";
+        break;
+
+    case "name_desc":
+        $orderBy = "p.name DESC, p.product_id DESC";
+        break;
+
+    case "price_asc":
+        $orderBy = "p.price ASC, p.product_id ASC";
+        break;
+
+    case "price_desc":
+        $orderBy = "p.price DESC, p.product_id DESC";
+        break;
+
+    case "qty_asc":
+        $orderBy = "p.quantity ASC, p.product_id ASC";
+        break;
+
+    case "qty_desc":
+        $orderBy = "p.quantity DESC, p.product_id DESC";
+        break;
+
     default:
         $orderBy = "p.product_id DESC";
+        break;
 }
 
 /* =========================================================
@@ -124,35 +122,25 @@ if ($search !== "") {
         $keyword
     );
 
-    mysqli_stmt_execute($countStmt);
-
-    mysqli_stmt_bind_result(
-        $countStmt,
-        $totalRecords
-    );
-
-    mysqli_stmt_fetch($countStmt);
-
-    mysqli_stmt_close($countStmt);
-
 } else {
 
     $countStmt = mysqli_prepare(
         $conn,
-        "SELECT COUNT(*) FROM products"
+        "SELECT COUNT(*)
+         FROM products"
     );
-
-    mysqli_stmt_execute($countStmt);
-
-    mysqli_stmt_bind_result(
-        $countStmt,
-        $totalRecords
-    );
-
-    mysqli_stmt_fetch($countStmt);
-
-    mysqli_stmt_close($countStmt);
 }
+
+mysqli_stmt_execute($countStmt);
+
+mysqli_stmt_bind_result(
+    $countStmt,
+    $totalRecords
+);
+
+mysqli_stmt_fetch($countStmt);
+
+mysqli_stmt_close($countStmt);
 
 /* =========================================================
    TOTAL PAGES
@@ -163,10 +151,12 @@ $totalPages = max(
     (int) ceil($totalRecords / $limit)
 );
 
+/* If current page no longer exists after deletion */
 if ($page > $totalPages) {
     $page = $totalPages;
-    $offset = ($page - 1) * $limit;
 }
+
+$offset = ($page - 1) * $limit;
 
 /* =========================================================
    GET PRODUCTS
@@ -242,9 +232,7 @@ include "../includes/header.php";
 <div class="page-title">
 
     <div class="product-page-title">
-
         <h2>📦 Product List</h2>
-
     </div>
 
     <a
@@ -255,6 +243,7 @@ include "../includes/header.php";
     </a>
 
 </div>
+
 
 <!-- =========================================================
      SUCCESS MESSAGES
@@ -391,7 +380,7 @@ include "../includes/header.php";
                 <option
                     value="qty_desc"
                     <?php echo $sort === "qty_desc" ? "selected" : ""; ?>
-                >
+                    >
                     Quantity High → Low
                 </option>
 
@@ -470,7 +459,8 @@ include "../includes/header.php";
 
                     <tr>
 
-                        <th>ID</th>
+                        <!-- DISPLAY NUMBER ONLY -->
+                        <th>No.</th>
 
                         <th>Image</th>
 
@@ -497,6 +487,19 @@ include "../includes/header.php";
 
                 <tbody>
 
+                <?php
+
+                /*
+                 * Display number starts from 1.
+                 * On page 2 it starts from 11.
+                 * The actual database product_id is NOT displayed.
+                 */
+
+                $displayNumber = $offset + 1;
+
+                ?>
+
+
                 <?php while ($row = mysqli_fetch_assoc($result)): ?>
 
                     <?php
@@ -521,6 +524,7 @@ include "../includes/header.php";
 
                         $statusClass = "out";
                         $statusText = "Out of Stock";
+
                     }
 
 
@@ -536,14 +540,16 @@ include "../includes/header.php";
 
                     <tr>
 
-                        <!-- ID -->
+                        <!-- =================================================
+                             DISPLAY NUMBER
+                             ================================================= -->
 
                         <td>
 
                             <strong class="product-id">
 
                                 <?php
-                                echo (int) $row['product_id'];
+                                echo $displayNumber;
                                 ?>
 
                             </strong>
@@ -551,7 +557,9 @@ include "../includes/header.php";
                         </td>
 
 
-                        <!-- IMAGE -->
+                        <!-- =================================================
+                             IMAGE
+                             ================================================= -->
 
                         <td>
 
@@ -582,7 +590,9 @@ include "../includes/header.php";
                         </td>
 
 
-                        <!-- NAME -->
+                        <!-- =================================================
+                             NAME
+                             ================================================= -->
 
                         <td>
 
@@ -599,7 +609,9 @@ include "../includes/header.php";
                         </td>
 
 
-                        <!-- DESCRIPTION -->
+                        <!-- =================================================
+                             DESCRIPTION
+                             ================================================= -->
 
                         <td>
 
@@ -620,6 +632,7 @@ include "../includes/header.php";
                                     echo htmlspecialchars(
                                         $description
                                     );
+
                                 }
 
                                 ?>
@@ -629,17 +642,21 @@ include "../includes/header.php";
                         </td>
 
 
-                        <!-- PRICE -->
+                        <!-- =================================================
+                             PRICE
+                             ================================================= -->
 
                         <td>
 
                             <span class="price">
 
                                 ৳<?php
+
                                 echo number_format(
                                     (float) $row['price'],
                                     2
                                 );
+
                                 ?>
 
                             </span>
@@ -647,7 +664,9 @@ include "../includes/header.php";
                         </td>
 
 
-                        <!-- QUANTITY -->
+                        <!-- =================================================
+                             QUANTITY
+                             ================================================= -->
 
                         <td>
 
@@ -662,6 +681,7 @@ include "../includes/header.php";
                                 } elseif ($quantity <= 5) {
 
                                     echo " quantity-low";
+
                                 }
 
                                 ?>"
@@ -676,7 +696,9 @@ include "../includes/header.php";
                         </td>
 
 
-                        <!-- SUPPLIER -->
+                        <!-- =================================================
+                             SUPPLIER
+                             ================================================= -->
 
                         <td>
 
@@ -692,7 +714,9 @@ include "../includes/header.php";
                         </td>
 
 
-                        <!-- STATUS -->
+                        <!-- =================================================
+                             STATUS
+                             ================================================= -->
 
                         <td>
 
@@ -709,16 +733,20 @@ include "../includes/header.php";
                         </td>
 
 
-                        <!-- CREATED -->
+                        <!-- =================================================
+                             CREATED
+                             ================================================= -->
 
                         <td>
 
                             <span class="created-date">
 
                                 <?php
+
                                 echo htmlspecialchars(
                                     $row['created_at']
                                 );
+
                                 ?>
 
                             </span>
@@ -726,11 +754,18 @@ include "../includes/header.php";
                         </td>
 
 
-                        <!-- ACTION -->
+                        <!-- =================================================
+                             ACTION
+                             ================================================= -->
 
                         <td>
 
                             <div class="actions">
+
+                                <!--
+                                    Real database ID is used here,
+                                    but NOT shown to the user.
+                                -->
 
                                 <a
                                     href="edit.php?id=<?php echo (int) $row['product_id']; ?>"
@@ -753,6 +788,18 @@ include "../includes/header.php";
                         </td>
 
                     </tr>
+
+
+                    <?php
+
+                    /*
+                     * Increase only the DISPLAY number.
+                     * Database product_id remains unchanged.
+                     */
+
+                    $displayNumber++;
+
+                    ?>
 
                 <?php endwhile; ?>
 

@@ -9,22 +9,21 @@ require_once __DIR__ . "/semantic.php";
 require_once __DIR__ . "/errors.php";
 
 /*
- * =========================================================
- * LOGIN CHECK
- * =========================================================
- */
+|--------------------------------------------------------------------------
+| Authentication
+|--------------------------------------------------------------------------
+*/
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../auth/login.php");
     exit();
 }
 
-
 /*
- * =========================================================
- * QUERY VARIABLES
- * =========================================================
- */
+|--------------------------------------------------------------------------
+| Query State
+|--------------------------------------------------------------------------
+*/
 
 $query = "";
 $tokens = [];
@@ -33,12 +32,11 @@ $results = [];
 $error = "";
 $stage = "";
 
-
 /*
- * =========================================================
- * PROCESS QUERY
- * =========================================================
- */
+|--------------------------------------------------------------------------
+| Process Query
+|--------------------------------------------------------------------------
+*/
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
@@ -54,10 +52,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
 
             /*
-             * =================================================
-             * 1. LEXICAL ANALYSIS
-             * =================================================
-             */
+            |--------------------------------------------------------------------------
+            | 1. Lexical Analysis
+            |--------------------------------------------------------------------------
+            */
 
             $tokens = tokenize($query);
 
@@ -71,62 +69,66 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-
             /*
-             * =================================================
-             * 2. SYNTAX ANALYSIS
-             * =================================================
-             */
+            |--------------------------------------------------------------------------
+            | 2. Syntax Analysis
+            |--------------------------------------------------------------------------
+            */
 
             $parser = new Parser($tokens);
-
             $parseTree = $parser->parse();
 
-
             /*
-             * =================================================
-             * 3. SEMANTIC ANALYSIS
-             * =================================================
-             */
+            |--------------------------------------------------------------------------
+            | 3. Semantic Analysis
+            |--------------------------------------------------------------------------
+            */
 
             $semanticAnalyzer = new SemanticAnalyzer();
-
             $semanticAnalyzer->analyze($parseTree);
 
-
             /*
-             * =================================================
-             * 4. DATABASE QUERY
-             *
-             * The compiler has now validated the query.
-             * We convert the validated parse tree into
-             * a safe SQL query.
-             * =================================================
-             */
+            |--------------------------------------------------------------------------
+            | 4. SQL Generation
+            |--------------------------------------------------------------------------
+            */
 
             $condition = $parseTree['condition'];
 
-            /*
-             * Build SQL WHERE clause recursively.
-             */
+            $allowedFields = [
+                'product_id',
+                'name',
+                'description',
+                'price',
+                'quantity',
+                'supplier_id',
+                'image'
+            ];
 
-            $buildCondition = function ($condition) use (&$buildCondition, $conn) {
+            /*
+            |--------------------------------------------------------------------------
+            | Build SQL condition recursively
+            |--------------------------------------------------------------------------
+            */
+
+            $buildCondition = function ($condition) use (
+                &$buildCondition,
+                $conn,
+                $allowedFields
+            ) {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Simple expression
+                |--------------------------------------------------------------------------
+                */
 
                 if ($condition['type'] === 'EXPRESSION') {
-
-                    $allowedFields = [
-                        'product_id',
-                        'name',
-                        'description',
-                        'price',
-                        'quantity',
-                        'supplier_id',
-                        'image'
-                    ];
 
                     $field = strtolower($condition['field']);
 
                     if (!in_array($field, $allowedFields, true)) {
+
                         throw new Exception(
                             "Database Error: Field '{$field}' is not allowed."
                         );
@@ -136,26 +138,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $value = $condition['value'];
 
                     /*
-                     * Numeric values
-                     */
+                    |--------------------------------------------------------------------------
+                    | Numeric value
+                    |--------------------------------------------------------------------------
+                    */
 
                     if (is_numeric($value)) {
 
-                        return "`$field` $operator " . (float)$value;
+                        return "`{$field}` {$operator} " . (float)$value;
                     }
 
                     /*
-                     * String values
-                     */
+                    |--------------------------------------------------------------------------
+                    | String value
+                    |--------------------------------------------------------------------------
+                    */
 
                     $escapedValue = mysqli_real_escape_string(
                         $conn,
                         $value
                     );
 
-                    return "`$field` $operator '{$escapedValue}'";
+                    return "`{$field}` {$operator} '{$escapedValue}'";
                 }
 
+                /*
+                |--------------------------------------------------------------------------
+                | Logical expression
+                |--------------------------------------------------------------------------
+                */
 
                 if ($condition['type'] === 'LOGICAL') {
 
@@ -171,26 +182,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $condition['operator']
                     );
 
-                    return "($left $operator $right)";
+                    return "({$left} {$operator} {$right})";
                 }
-
 
                 throw new Exception(
                     "Database Error: Invalid condition."
                 );
             };
 
-
-            $whereClause = $buildCondition(
-                $condition
-            );
-
+            $whereClause = $buildCondition($condition);
 
             /*
-             * =================================================
-             * EXECUTE DATABASE QUERY
-             * =================================================
-             */
+            |--------------------------------------------------------------------------
+            | 5. Database Execution
+            |--------------------------------------------------------------------------
+            */
 
             $sql = "
                 SELECT
@@ -199,16 +205,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 FROM products p
                 LEFT JOIN suppliers s
                     ON p.supplier_id = s.supplier_id
-                WHERE $whereClause
+                WHERE {$whereClause}
                 ORDER BY p.product_id DESC
             ";
 
-
-            $result = mysqli_query(
-                $conn,
-                $sql
-            );
-
+            $result = mysqli_query($conn, $sql);
 
             if (!$result) {
 
@@ -217,20 +218,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 );
             }
 
-
             while ($row = mysqli_fetch_assoc($result)) {
-
                 $results[] = $row;
             }
-
 
         } catch (Exception $e) {
 
             $error = $e->getMessage();
 
             /*
-             * Determine which compiler stage failed.
-             */
+            |--------------------------------------------------------------------------
+            | Determine Compiler Stage
+            |--------------------------------------------------------------------------
+            */
 
             if (stripos($error, "Lexical Error") === 0) {
 
@@ -248,7 +248,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $stage = "DATABASE";
 
-            } else {
+            } elseif ($stage === "") {
 
                 $stage = "COMPILER";
             }
@@ -256,16 +256,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+/*
+|--------------------------------------------------------------------------
+| Helper: Escape HTML
+|--------------------------------------------------------------------------
+*/
+
+function e($value)
+{
+    return htmlspecialchars(
+        (string)$value,
+        ENT_QUOTES,
+        'UTF-8'
+    );
+}
 
 /*
- * =========================================================
- * PAGE HEADER
- * =========================================================
- */
+|--------------------------------------------------------------------------
+| Page Header
+|--------------------------------------------------------------------------
+*/
 
 include "../includes/header.php";
 
 ?>
+
+<!-- =========================================================
+     PAGE HEADER
+========================================================= -->
 
 <div class="page-title">
 
@@ -284,7 +302,7 @@ include "../includes/header.php";
 
 <!-- =========================================================
      QUERY INPUT
-     ========================================================= -->
+========================================================= -->
 
 <div class="product-table-card query-analyzer-card">
 
@@ -295,7 +313,6 @@ include "../includes/header.php";
         <p>
             Enter a query using the Inventory Query Language.
         </p>
-
 
         <form method="POST">
 
@@ -313,10 +330,10 @@ include "../includes/header.php";
                     name="query"
                     rows="4"
                     placeholder="SHOW PRODUCTS WHERE quantity < 10"
-                ><?php echo htmlspecialchars($query); ?></textarea>
+                    required
+                ><?php echo e($query); ?></textarea>
 
             </div>
-
 
             <button
                 type="submit"
@@ -327,10 +344,9 @@ include "../includes/header.php";
 
         </form>
 
-
         <!-- =================================================
              EXAMPLE QUERIES
-             ================================================= -->
+        ================================================== -->
 
         <div class="query-examples">
 
@@ -361,7 +377,7 @@ include "../includes/header.php";
 
 <!-- =========================================================
      ERROR
-     ========================================================= -->
+========================================================= -->
 
 <?php if ($error !== ""): ?>
 
@@ -371,14 +387,18 @@ include "../includes/header.php";
 
     <?php if ($stage !== ""): ?>
 
-        <strong>
-            Stage: <?php echo htmlspecialchars($stage); ?>
-        </strong>
+        <p>
+            <strong>
+                Stage:
+            </strong>
+
+            <?php echo e($stage); ?>
+        </p>
 
     <?php endif; ?>
 
     <p>
-        <?php echo htmlspecialchars($error); ?>
+        <?php echo e($error); ?>
     </p>
 
 </div>
@@ -388,7 +408,7 @@ include "../includes/header.php";
 
 <!-- =========================================================
      LEXICAL ANALYSIS
-     ========================================================= -->
+========================================================= -->
 
 <?php if (!empty($tokens)): ?>
 
@@ -401,7 +421,6 @@ include "../includes/header.php";
         <p>
             The query was converted into tokens.
         </p>
-
 
         <div class="compiler-table-wrapper">
 
@@ -429,20 +448,12 @@ include "../includes/header.php";
 
                         <td>
                             <strong>
-                                <?php
-                                echo htmlspecialchars(
-                                    $token['type']
-                                );
-                                ?>
+                                <?php echo e($token['type']); ?>
                             </strong>
                         </td>
 
                         <td>
-                            <?php
-                            echo htmlspecialchars(
-                                $token['value']
-                            );
-                            ?>
+                            <?php echo e($token['value']); ?>
                         </td>
 
                     </tr>
@@ -463,33 +474,40 @@ include "../includes/header.php";
 
 
 <!-- =========================================================
-     SYNTAX + SEMANTIC SUCCESS
-     ========================================================= -->
+     SUCCESS + PARSE TREE + RESULTS
+========================================================= -->
 
 <?php if ($parseTree !== null && $error === ""): ?>
+
+<!-- =========================================================
+     COMPILER CHECKS
+========================================================= -->
 
 <div class="compiler-success">
 
     <h3>✅ Compiler Checks Passed</h3>
 
     <p>
-        Lexical Analysis: <strong>VALID</strong>
+        Lexical Analysis:
+        <strong>VALID</strong>
     </p>
 
     <p>
-        Syntax Analysis: <strong>VALID</strong>
+        Syntax Analysis:
+        <strong>VALID</strong>
     </p>
 
     <p>
-        Semantic Analysis: <strong>VALID</strong>
+        Semantic Analysis:
+        <strong>VALID</strong>
     </p>
 
 </div>
 
 
 <!-- =========================================================
-     PARSE TREE
-     ========================================================= -->
+     SYNTAX ANALYSIS
+========================================================= -->
 
 <div class="product-table-card compiler-result-card">
 
@@ -499,11 +517,11 @@ include "../includes/header.php";
 
         <p>
             The query was successfully parsed using
-            Recursive Descent Parsing.
+            <strong>Recursive Descent Parsing</strong>.
         </p>
 
         <pre class="parse-tree"><?php
-echo htmlspecialchars(
+echo e(
     print_r($parseTree, true)
 );
 ?></pre>
@@ -514,8 +532,8 @@ echo htmlspecialchars(
 
 
 <!-- =========================================================
-     DATABASE RESULTS
-     ========================================================= -->
+     SEMANTIC ANALYSIS + INVENTORY RESULTS
+========================================================= -->
 
 <div class="product-table-card compiler-result-card">
 
@@ -528,117 +546,133 @@ echo htmlspecialchars(
             and type checking.
         </p>
 
+        <div class="compiler-status-line">
+            <span>Semantic Analysis</span>
+            <strong>VALID</strong>
+        </div>
+
         <h3>4. Inventory Results</h3>
 
         <?php if (!empty($results)): ?>
 
-        <div class="compiler-table-wrapper">
+            <div class="compiler-table-wrapper">
 
-            <table class="product-table">
+                <table class="product-table">
 
-                <thead>
+                    <thead>
 
-                    <tr>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Supplier</th>
+                            <th>Status</th>
+                        </tr>
 
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Supplier</th>
-                        <th>Status</th>
+                    </thead>
 
-                    </tr>
+                    <tbody>
 
-                </thead>
+                    <?php foreach ($results as $row): ?>
 
-                <tbody>
+                        <?php
 
-                <?php foreach ($results as $row): ?>
+                        $quantity = (int)$row['quantity'];
 
-                    <?php
+                        if ($quantity > 5) {
 
-                    $quantity = (int)$row['quantity'];
+                            $status = "Available";
+                            $statusClass = "available";
 
-                    if ($quantity > 5) {
+                        } elseif ($quantity > 0) {
 
-                        $status = "Available";
+                            $status = "Low Stock";
+                            $statusClass = "low";
 
-                    } elseif ($quantity > 0) {
+                        } else {
 
-                        $status = "Low Stock";
+                            $status = "Out of Stock";
+                            $statusClass = "out";
+                        }
 
-                    } else {
+                        ?>
 
-                        $status = "Out of Stock";
-                    }
+                        <tr>
 
-                    ?>
+                            <td>
+                                <?php
+                                echo (int)$row['product_id'];
+                                ?>
+                            </td>
 
-                    <tr>
+                            <td>
+                                <?php
+                                echo e($row['name']);
+                                ?>
+                            </td>
 
-                        <td>
-                            <?php
-                            echo (int)$row['product_id'];
-                            ?>
-                        </td>
+                            <td>
+                                ৳<?php
+                                echo number_format(
+                                    (float)$row['price'],
+                                    2
+                                );
+                                ?>
+                            </td>
 
-                        <td>
-                            <?php
-                            echo htmlspecialchars(
-                                $row['name']
-                            );
-                            ?>
-                        </td>
+                            <td>
+                                <?php echo $quantity; ?>
+                            </td>
 
-                        <td>
-                            ৳<?php
-                            echo number_format(
-                                (float)$row['price'],
-                                2
-                            );
-                            ?>
-                        </td>
+                            <td>
+                                <?php
+                                echo e(
+                                    $row['supplier_name']
+                                    ?? "No Supplier"
+                                );
+                                ?>
+                            </td>
 
-                        <td>
-                            <?php
-                            echo $quantity;
-                            ?>
-                        </td>
+                            <td>
 
-                        <td>
-                            <?php
-                            echo htmlspecialchars(
-                                $row['supplier_name']
-                                ?? "No Supplier"
-                            );
-                            ?>
-                        </td>
+                                <span
+                                    class="status <?php echo e($statusClass); ?>"
+                                >
+                                    <?php echo e($status); ?>
+                                </span>
 
-                        <td>
-                            <?php
-                            echo $status;
-                            ?>
-                        </td>
+                            </td>
 
-                    </tr>
+                        </tr>
 
-                <?php endforeach; ?>
+                    <?php endforeach; ?>
 
-                </tbody>
+                    </tbody>
 
-            </table>
+                </table>
 
-        </div>
+            </div>
+
+            <div class="query-result-summary">
+
+                <strong>
+                    <?php echo count($results); ?>
+                </strong>
+
+                matching product<?php echo count($results) === 1 ? '' : 's'; ?>
+
+            </div>
 
         <?php else: ?>
 
             <div class="empty-state">
 
-                <h3>No matching products</h3>
+                <h3>🔍 No Matching Products</h3>
 
                 <p>
                     The query is valid, but no products
-                    matched the condition.
+                    matched the specified condition.
                 </p>
 
             </div>

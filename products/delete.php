@@ -1,105 +1,215 @@
 <?php
+
 session_start();
+
 require_once "../db.php";
+
+
+/* =========================================================
+   LOGIN CHECK
+   ========================================================= */
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../auth/login.php");
     exit();
 }
 
-if (!isset($_GET['id'])) {
-    die("Product ID not found.");
+
+/* =========================================================
+   CHECK PRODUCT ID
+   ========================================================= */
+
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+
+    die("Invalid product ID.");
+
 }
 
-$id = (int)$_GET['id'];
+$id = (int) $_GET['id'];
 
-// Get product information
-$stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE product_id = ?");
-mysqli_stmt_bind_param($stmt, "i", $id);
+
+/* =========================================================
+   GET PRODUCT
+   ========================================================= */
+
+$stmt = mysqli_prepare(
+    $conn,
+    "SELECT *
+     FROM products
+     WHERE product_id = ?"
+);
+
+mysqli_stmt_bind_param(
+    $stmt,
+    "i",
+    $id
+);
+
 mysqli_stmt_execute($stmt);
 
 $result = mysqli_stmt_get_result($stmt);
+
 $product = mysqli_fetch_assoc($result);
 
-if (!$product) {
-    die("Product not found.");
-}
-// Delete product
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+mysqli_stmt_close($stmt);
 
-    // Delete image if it exists
+
+if (!$product) {
+
+    die("Product not found.");
+
+}
+
+
+/* =========================================================
+   DELETE PRODUCT
+   ========================================================= */
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+
+
+    /* -----------------------------------------------------
+       DELETE IMAGE
+       ----------------------------------------------------- */
+
     if (!empty($product['image'])) {
 
-        $imagePath = "../assets/uploads/" . $product['image'];
+        $imagePath =
+            "../assets/uploads/" .
+            $product['image'];
 
         if (file_exists($imagePath)) {
+
             unlink($imagePath);
+
         }
+
     }
 
-    // Delete product from database
+
+    /* -----------------------------------------------------
+       DELETE DATABASE RECORD
+       ----------------------------------------------------- */
+
     $stmt = mysqli_prepare(
         $conn,
-        "DELETE FROM products WHERE product_id = ?"
+        "DELETE FROM products
+         WHERE product_id = ?"
     );
 
-    mysqli_stmt_bind_param($stmt, "i", $id);
+    mysqli_stmt_bind_param(
+        $stmt,
+        "i",
+        $id
+    );
+
 
     if (mysqli_stmt_execute($stmt)) {
 
-        header("Location: view.php?deleted=1");
+        mysqli_stmt_close($stmt);
+
+        /*
+         * Redirect back to product list.
+         *
+         * view.php will automatically recalculate
+         * the product count and pagination.
+         */
+
+        header(
+            "Location: view.php?deleted=1"
+        );
+
         exit();
 
-    } else {
-
-        echo "<p style='color:red;'>Failed to delete product.</p>";
-
     }
+
+
+    mysqli_stmt_close($stmt);
+
+    die("Failed to delete product.");
+
 }
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+include "../includes/header.php";
+
 ?>
 
-<?php include "../includes/header.php"; ?>
 
-<h2>Delete Product</h2>
+<div class="delete-container">
 
-<p>
-Are you sure you want to delete this product?
-</p>
+    <h2>🗑️ Delete Product</h2>
 
-<table border="1" cellpadding="10">
-    <tr>
-        <th>Name</th>
-        <td><?php echo htmlspecialchars($product['name']); ?></td>
-    </tr>
+    <p>
+        Are you sure you want to delete this product?
+    </p>
 
-    <tr>
-        <th>Price</th>
-        <td><?php echo $product['price']; ?></td>
-    </tr>
 
-    <tr>
-        <th>Quantity</th>
-        <td><?php echo $product['quantity']; ?></td>
-    </tr>
-</table>
+    <div class="delete-product-info">
 
-<br>
+        <p>
+            <strong>Name:</strong>
 
-<form method="POST">
+            <?php
+            echo htmlspecialchars(
+                $product['name']
+            );
+            ?>
+        </p>
 
-<button
-type="submit"
-name="delete"
-onclick="return confirm('Are you absolutely sure?');">
-    🗑 Delete Product
-</button>
 
-    <a href="view.php">
-        <button type="button">
-            Cancel
+        <p>
+            <strong>Price:</strong>
+
+            ৳<?php
+            echo number_format(
+                (float) $product['price'],
+                2
+            );
+            ?>
+        </p>
+
+
+        <p>
+            <strong>Quantity:</strong>
+
+            <?php
+            echo (int) $product['quantity'];
+            ?>
+        </p>
+
+    </div>
+
+
+    <form method="POST">
+
+        <button
+            type="submit"
+            class="btn delete-btn"
+            onclick="return confirm('Are you absolutely sure you want to delete this product?');"
+        >
+            🗑️ Delete Product
         </button>
-    </a>
 
-</form>
 
-<?php include "../includes/footer.php"; ?>
+        <a
+            href="view.php"
+            class="btn"
+        >
+            Cancel
+        </a>
+
+    </form>
+
+</div>
+
+
+<?php
+
+include "../includes/footer.php";
+
+?>

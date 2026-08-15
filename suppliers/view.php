@@ -1,86 +1,292 @@
 <?php
+
 session_start();
 require_once "../db.php";
+
+/* =========================================================
+   LOGIN CHECK
+   ========================================================= */
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../auth/login.php");
     exit();
 }
 
+
+/* =========================================================
+   GET SUPPLIERS
+   ========================================================= */
+
+$query = "
+    SELECT *
+    FROM suppliers
+    ORDER BY supplier_id DESC
+";
+
+$result = mysqli_query($conn, $query);
+
+if (!$result) {
+    die("Error loading suppliers: " . mysqli_error($conn));
+}
+
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
 include "../includes/header.php";
+
 ?>
 
-<h2>Supplier List</h2>
 
-<?php
-if (isset($_GET['deleted'])) {
-    echo "<p style='color:green;'>✅ Supplier deleted successfully.</p>";
-}
+<!-- PAGE TITLE -->
 
-if (isset($_GET['updated'])) {
-    echo "<p style='color:green;'>✅ Supplier updated successfully.</p>";
-}
+<div class="page-title">
 
-if (isset($_GET['added'])) {
-    echo "<p style='color:green;'>✅ Supplier added successfully.</p>";
-}
-?>
+    <h2>🏢 Supplier List</h2>
 
-<div class="nav">
-    <a href="../dashboard.php">Dashboard</a>
-    <a href="add.php"><button>Add Supplier</button></a>
+    <a href="add.php" class="btn">
+        ＋ Add Supplier
+    </a>
+
 </div>
 
-<table>
 
-<tr>
-    <th>ID</th>
-    <th>Name</th>
-    <th>Email</th>
-    <th>Phone</th>
-    <th>Address</th>
-    <th>Action</th>
-</tr>
+<!-- SUCCESS MESSAGES -->
+
+<?php if (isset($_GET['deleted'])): ?>
+
+    <div class="success">
+        🗑️ Supplier deleted successfully.
+    </div>
+
+<?php endif; ?>
+
+
+<?php if (isset($_GET['updated'])): ?>
+
+    <div class="success">
+        ✅ Supplier updated successfully.
+    </div>
+
+<?php endif; ?>
+
+
+<?php if (isset($_GET['added'])): ?>
+
+    <div class="success">
+        ✅ Supplier added successfully.
+    </div>
+
+<?php endif; ?>
+
+
+<!-- SUPPLIER TABLE -->
+
+<?php if (mysqli_num_rows($result) > 0): ?>
+
+<div class="table-container">
+
+    <div class="product-table-card">
+
+        <div class="product-table-wrapper">
+
+            <table class="product-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>No.</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                <?php
+
+                /*
+                 * Display number only.
+                 * This is NOT the database supplier_id.
+                 */
+
+                $no = 1;
+
+                while ($row = mysqli_fetch_assoc($result)):
+
+                ?>
+
+                    <tr>
+
+                        <!-- DISPLAY NUMBER -->
+
+                        <td>
+
+                            <strong>
+                                <?php echo $no; ?>
+                            </strong>
+
+                        </td>
+
+
+                        <!-- NAME -->
+
+                        <td>
+
+                            <strong>
+                                <?php
+                                echo htmlspecialchars(
+                                    $row['name']
+                                );
+                                ?>
+                            </strong>
+
+                        </td>
+
+
+                        <!-- EMAIL -->
+
+                        <td>
+
+                            <?php
+                            echo htmlspecialchars(
+                                $row['email']
+                            );
+                            ?>
+
+                        </td>
+
+
+                        <!-- PHONE -->
+
+                        <td>
+
+                            <?php
+                            echo htmlspecialchars(
+                                $row['phone']
+                            );
+                            ?>
+
+                        </td>
+
+
+                        <!-- ADDRESS -->
+
+                        <td>
+
+                            <?php
+                            echo htmlspecialchars(
+                                $row['address']
+                            );
+                            ?>
+
+                        </td>
+
+
+                        <!-- ACTION -->
+
+                        <td>
+
+                            <div class="actions">
+
+                                <a
+                                    href="edit.php?id=<?php echo (int) $row['supplier_id']; ?>"
+                                    class="btn action-btn edit-btn"
+                                >
+                                    ✏️ Edit
+                                </a>
+
+
+                                <a
+                                    href="delete.php?id=<?php echo (int) $row['supplier_id']; ?>"
+                                    class="btn action-btn delete-btn"
+                                    onclick="return confirm('Are you sure you want to delete this supplier?');"
+                                >
+                                    🗑️ Delete
+                                </a>
+
+                            </div>
+
+                        </td>
+
+                    </tr>
+
+                <?php
+
+                    /*
+                     * Increase visible number.
+                     */
+
+                    $no++;
+
+                endwhile;
+
+                ?>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- RESULT COUNT -->
+
+<div class="result-count">
+
+    Showing
+
+    <strong>
+        <?php echo $no - 1; ?>
+    </strong>
+
+    supplier(s)
+
+</div>
+
+
+<?php else: ?>
+
+
+<!-- EMPTY STATE -->
+
+<div class="empty-state">
+
+    <div class="empty-icon">
+        🏢
+    </div>
+
+    <h3>
+        No Suppliers Found
+    </h3>
+
+    <p>
+        There are currently no suppliers in your inventory.
+    </p>
+
+    <a href="add.php" class="btn">
+        ＋ Add First Supplier
+    </a>
+
+</div>
+
+<?php endif; ?>
+
 
 <?php
 
-$result = mysqli_query(
-    $conn,
-    "SELECT * FROM suppliers ORDER BY supplier_id DESC"
-);
-
-while ($row = mysqli_fetch_assoc($result)) {
-
-    echo "<tr>
-
-        <td>{$row['supplier_id']}</td>
-
-        <td>" . htmlspecialchars($row['name']) . "</td>
-
-        <td>" . htmlspecialchars($row['email']) . "</td>
-
-        <td>" . htmlspecialchars($row['phone']) . "</td>
-
-        <td>" . htmlspecialchars($row['address']) . "</td>
-
-        <td>
-
-            <a href='edit.php?id={$row['supplier_id']}'>Edit</a> |
-
-            <a href='delete.php?id={$row['supplier_id']}'>
-                Delete
-            </a>
-
-        </td>
-
-    </tr>";
-
-}
-
-?>
-
-</table>
-
-<?php
 include "../includes/footer.php";
+
 ?>
