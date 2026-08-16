@@ -372,13 +372,13 @@ You can access it through:
 http://localhost/inventory/auth/login.php
 ```
 
-> For security, do not publish real passwords, database credentials, or private configuration information in the GitHub repository.
+> For security, Didn't publish real passwords, database credentials, or private configuration information in the GitHub repository.
 
 ---
 
 ## 🧪 Testing Checklist
 
-Before submitting or demonstrating the project, test the following.
+Before submitting or demonstrating the project, the following were tested.
 
 ### Authentication
 
